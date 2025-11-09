@@ -1,0 +1,78 @@
+#!/bin/bash
+
+FILE="addressbook.txt"
+
+create_book() {
+    > $FILE
+    echo "Address book created."
+}
+
+view_book() {
+    if [ -s $FILE ]; then
+        cat $FILE
+    else
+        echo "Address book is empty."
+    fi
+}
+
+insert_record() {
+    echo -n "Enter Name: "
+    read name
+    echo -n "Enter Phone: "
+    read phone
+    echo -n "Enter Email: "
+    read email
+    echo "$name | $phone | $email" >> $FILE
+    echo "Record added."
+}
+
+delete_record() {
+    echo -n "Enter Name to delete: "
+    read name
+    sed -i "/^$name /d" $FILE
+    echo "Record deleted (if existed)."
+}
+
+modify_record() {
+    echo -n "Enter Name to modify: "
+    read name
+
+    grep "^$name " $FILE > /dev/null
+    if [ $? -ne 0 ]; then
+        echo "Record not found."
+        return
+    fi
+
+    echo -n "New Name: "
+    read newname
+    echo -n "New Phone: "
+    read newphone
+    echo -n "New Email: "
+    read newemail
+
+    sed -i "/^$name /c$newname | $newphone | $newemail" $FILE
+    echo "Record updated."
+}
+
+while true
+do
+    echo ""
+    echo "1) Create Address Book"
+    echo "2) View Address Book"
+    echo "3) Insert Record"
+    echo "4) Delete Record"
+    echo "5) Modify Record"
+    echo "6) Exit"
+    echo -n "Enter your choice: "
+    read ch
+
+    case $ch in
+        1) create_book ;;
+        2) view_book ;;
+        3) insert_record ;;
+        4) delete_record ;;
+        5) modify_record ;;
+        6) exit ;;
+        *) echo "Invalid choice." ;;
+    esac
+done
