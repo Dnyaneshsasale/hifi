@@ -1,0 +1,41 @@
+#include <stdio.h>
+
+int main() {
+    int n, frames, i, j, k, pageFault = 0, flag, index = 0;
+    printf("Enter number of frames: ");
+    scanf("%d", &frames);
+    printf("Enter number of pages: ");
+    scanf("%d", &n);
+    int pages[n], f[frames];
+    for(i = 0; i < frames; i++) f[i] = -1;  // initialize frames empty
+
+    printf("Enter page reference string:\n");
+    for(i = 0; i < n; i++) scanf("%d", &pages[i]);
+
+    printf("\nPage\tFrames\t\tFault\n");
+    for(i = 0; i < n; i++) {
+        flag = 0;
+        // Check if page already in frame (hit)
+        for(j = 0; j < frames; j++) {
+            if(f[j] == pages[i]) {
+                flag = 1;
+                break;
+            }
+        }
+        if(flag == 0) { // page fault
+            f[index] = pages[i];    // replace page in FCFS manner
+            index = (index + 1) % frames;
+            pageFault++;
+        }
+
+        printf("%d\t", pages[i]);
+        for(k = 0; k < frames; k++) {
+            if(f[k] != -1) printf("%d ", f[k]);
+            else printf("- ");
+        }
+        if(flag == 0) printf("\tYes\n");
+        else printf("\tNo\n");
+    }
+    printf("Total page faults: %d\n", pageFault);
+return 0;
+}
