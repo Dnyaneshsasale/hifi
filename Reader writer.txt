@@ -1,0 +1,80 @@
+#include <stdio.h>
+#include <pthread.h>
+#include <semaphore.h>
+#include <unistd.h>
+
+sem_t mutex;
+sem_t db;
+int rc = 0;
+
+#define down sem_wait
+#define up   sem_post
+
+void* reader(void* arg)
+{
+    down(&mutex);
+    rc = rc + 1;
+    if (rc == 1)
+        down(&db);
+    up(&mutex);
+
+    // CRITICAL SECTION (READING)
+    printf("Reader is reading...\n");
+    sleep(1);
+
+    down(&mutex);
+    rc = rc - 1;
+    if (rc == 0)
+        up(&db);
+    up(&mutex);
+
+    return NULL;
+}
+
+void* writer(void* arg)
+{
+    down(&db);
+
+    // CRITICAL SECTION (WRITING)
+    printf("Writer is writing...\n");
+    sleep(1);
+
+    up(&db);
+
+    return NULL;
+}
+
+int main()
+{
+    int r, w, i;
+
+    printf("Enter number of readers: ");
+    scanf("%d", &r);
+    printf("Enter number of writers: ");
+    scanf("%d", &w);
+
+    pthread_t readers[r], writers[w];
+    int rid[r], wid[w];
+
+    sem_init(&mutex, 0, 1);
+    sem_init(&db, 0, 1);
+
+    for (i = 0; i < r; i++) {
+        rid[i] = i + 1;
+        pthread_create(&readers[i], NULL, reader, &rid[i]);
+    }
+
+    for (i = 0; i < w; i++) {
+        wid[i] = i + 1;
+        pthread_create(&writers[i], NULL, writer, &wid[i]);
+    }
+
+    for (i = 0; i < r; i++) pthread_join(readers[i], NULL);
+    for (i = 0; i < w; i++) pthread_join(writers[i], NULL);
+
+    sem_destroy(&mutex);
+    sem_destroy(&db);
+
+    printf("Program finished.\n");
+    return 0;
+}
