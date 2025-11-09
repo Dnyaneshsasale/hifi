@@ -1,0 +1,44 @@
+#include <stdio.h>
+#include <stdlib.h>  // for abs()
+
+int main() {
+    int n, head, i, j;
+    printf("Enter number of requests: ");
+    scanf("%d", &n);
+
+    int requests[n], served[n];
+    printf("Enter requests:\n");
+    for(i=0; i<n; i++) {
+        scanf("%d", &requests[i]);
+        served[i] = 0;  // mark unserved initially
+    }
+
+    printf("Enter initial head position: ");
+    scanf("%d", &head);
+
+    int total_seek = 0;
+    for(i=0; i<n; i++) {
+        int min_dist = 10000, min_index = -1;
+
+        // Find closest unserved request
+        for(j=0; j<n; j++) {
+            if (!served[j]) {
+                int dist = abs(head - requests[j]);
+                if (dist < min_dist) {
+                    min_dist = dist;
+                    min_index = j;
+                }
+            }
+        }
+
+        // Serve the closest request
+        total_seek += min_dist;
+        head = requests[min_index];
+        served[min_index] = 1;
+
+        printf("Moved to %d with seek %d\n", head, min_dist);
+    }
+    printf("Total seek time: %d\n", total_seek);
+
+return 0;
+}
